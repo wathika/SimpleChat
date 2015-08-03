@@ -9,17 +9,22 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Toast;
 
+import com.parse.FindCallback;
 import com.parse.LogInCallback;
 import com.parse.Parse;
 import com.parse.ParseAnonymousUtils;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 import com.parse.SignUpCallback;
 
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class ChatActivity extends Activity {
@@ -35,6 +40,15 @@ public class ChatActivity extends Activity {
     public static final String USER_ID_KEY = "userId";
     private EditText etMessage;
     private Button btSend;
+
+    //bind our custom adapter to this ListView
+    private ListView lvChat;
+    private ArrayList<Message> mMessages;
+    private ChatListAdapter mAdapter;
+
+    //fetch last 50 messages from parse
+    private static final int MAX_CHAT_MESSAGES_TO_SHOW = 50;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +90,11 @@ public class ChatActivity extends Activity {
         // Find the text field and button
         etMessage = (EditText) findViewById(R.id.etMessage);
         btSend = (Button) findViewById(R.id.btSend);
+        //bind our custom adapter to this ListView
+        lvChat = (ListView) findViewById(R.id.lvChat);
+        mMessages = new ArrayList<Message>();
+        mAdapter = new ChatListAdapter(ChatActivity.this, sUserId, mMessages);
+        lvChat.setAdapter(mAdapter);
         // When send button is clicked, create message object on Parse
         btSend.setOnClickListener(new View.OnClickListener() {
 
@@ -96,6 +115,31 @@ public class ChatActivity extends Activity {
 
                 });
                 etMessage.setText("");
+            }
+        });
+    }
+    // Query messages from Parse so we can load them into the chat adapter
+    private void receiveMessage() {
+        // Construct query to execute
+        ParseQuery<Message> query = ParseQuery.getQuery(Message.class);
+        // Configure limit and sort order
+        query.setLimit(MAX_CHAT_MESSAGES_TO_SHOW);
+        query.orderByAscending("createdAt");
+        // Execute query to fetch all messages from Parse asynchronously
+        // This is equivalent to a SELECT query with SQL
+        query.findInBackground(new FindCallback<Message>() {
+
+            @Override
+            public void done(List<Message> list<Message> messages, com.parse.ParseException e) {
+                if (e == null) {
+                    mMessages.clear();
+                    mMessages.addAll(messages);
+                    mAdapter.notifyDataSetChanged(); // update adapter
+                    lvChat.invalidate(); // redraw listview
+                }else{
+                    Log.d("message", "Error: " + e.getMessage());
+                    }
+
             }
         });
     }
