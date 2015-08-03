@@ -3,6 +3,7 @@ package com.moringaschool.alienske.simplechat;
 import android.app.Application;
 
 import com.parse.Parse;
+import com.parse.ParseObject;
 
 /**
  * Created by USER on 03/08/2015.
@@ -14,7 +15,11 @@ public class ChatApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        //Parse models registered here.
         Parse.enableLocalDatastore(this);
+        //Initialisation occurs after all classes are registered
         Parse.initialize(this, YOUR_APPLICATION_ID, YOUR_CLIENT_KEY);
     }
+
+
 }
