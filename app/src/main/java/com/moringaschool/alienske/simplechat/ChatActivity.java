@@ -130,7 +130,7 @@ public class ChatActivity extends Activity {
         query.findInBackground(new FindCallback<Message>() {
 
             @Override
-            public void done(List<Message> list<Message> messages, com.parse.ParseException e) {
+            public void done(List<Message> messages, com.parse.ParseException e) {
                 if (e == null) {
                     mMessages.clear();
                     mMessages.addAll(messages);
